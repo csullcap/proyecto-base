@@ -38,10 +38,10 @@ const Users = () => {
   };
 
   const confirmDelete = async () => {
-    if (!userToDelete) return;
+    if (!userToDelete || !userToDelete.id) return;
 
     try {
-      await deleteUser(userToDelete.uid);
+      await deleteUser(userToDelete.id);
       toast.success("Usuario eliminado correctamente");
       setUserToDelete(null);
     } catch (error) {
@@ -112,7 +112,7 @@ const Users = () => {
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user.uid}>
+                  <tr key={user.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         {user.photoURL && (
@@ -126,7 +126,7 @@ const Users = () => {
                         )}
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {user.email}
+                            {user.displayName || user.email}
                           </div>
                         </div>
                       </div>

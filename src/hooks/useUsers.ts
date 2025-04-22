@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  type UseQueryResult,
-} from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   collection,
   getDocs,
@@ -16,6 +11,7 @@ import {
 import { db } from "../firebase/config";
 import { useAuth } from "./useAuth";
 import type { User, UsersHookReturn } from "../types";
+import { useMemo } from "react";
 
 export const useUsers = (): UsersHookReturn => {
   const queryClient = useQueryClient();
@@ -28,7 +24,7 @@ export const useUsers = (): UsersHookReturn => {
     return snapshot.docs.map(
       (doc) =>
         ({
-          uid: doc.id,
+          id: doc.id,
           ...doc.data(),
         } as User)
     );
@@ -40,16 +36,31 @@ export const useUsers = (): UsersHookReturn => {
     const docRef = doc(db, "users", id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return { uid: docSnap.id, ...docSnap.data() } as User;
+      return { id: docSnap.id, ...docSnap.data() } as User;
     }
     return null;
   };
 
   // Crear o actualizar usuario
   const saveUser = async (userData: Partial<User>): Promise<Partial<User>> => {
-    // Crear usuario en Authentication y Firestore
-    await createUser(userData);
-    return userData;
+    if (!userData.email) {
+      throw new Error("El correo electrónico es requerido");
+    }
+
+    // Asegurarse de que el rol sea del tipo correcto
+    const validatedUserData: Partial<User> = {
+      ...userData,
+      role: userData.role === "admin" ? "admin" : "user",
+    };
+
+    try {
+      // Crear usuario en Firestore
+      await createUser(validatedUserData);
+      return validatedUserData;
+    } catch (error) {
+      console.error("Error en saveUser:", error);
+      throw error;
+    }
   };
 
   // Eliminar usuario
@@ -64,13 +75,17 @@ export const useUsers = (): UsersHookReturn => {
     queryFn: getUsers,
   });
 
-  const userByIdQuery = (id?: string): UseQueryResult<User | null, Error> => {
-    const query = useQuery({
+  const userByIdQueryFn = async (id?: string) => {
+    if (!id) return null;
+    return getUserById(id);
+  };
+
+  const userByIdQuery = (id?: string) => {
+    return useQuery({
       queryKey: ["users", id],
-      queryFn: () => getUserById(id),
+      queryFn: () => userByIdQueryFn(id),
       enabled: !!id,
     });
-    return query;
   };
 
   const saveUserMutation = useMutation({
@@ -87,12 +102,14 @@ export const useUsers = (): UsersHookReturn => {
     },
   });
 
+  const memoizedUserByIdQuery = useMemo(() => userByIdQuery, []);
+
   return {
     users: usersQuery.data || [],
     isLoading: usersQuery.isLoading,
     isError: usersQuery.isError,
     error: usersQuery.error as Error | null,
-    userByIdQuery,
+    userByIdQuery: memoizedUserByIdQuery,
     saveUser: saveUserMutation.mutate,
     deleteUser: deleteUserMutation.mutate,
     isSaving: saveUserMutation.isPending,

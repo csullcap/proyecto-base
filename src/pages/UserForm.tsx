@@ -12,18 +12,17 @@ const UserForm = () => {
   const { userByIdQuery, saveUser, isSaving } = useUsers();
   const { data: existingUser, isLoading } = userByIdQuery(id);
 
-  // Change the initial formData state to only include email and default role
+  // Cambiar el estado inicial para incluir solo email y rol
   const [formData, setFormData] = useState<Partial<User>>({
     email: "",
-    role: "user", // Set default role, but don't show it in the form
+    role: "user" as const, // Especificar el tipo literal
   });
 
   useEffect(() => {
     if (existingUser) {
       setFormData({
-        uid: existingUser.uid,
+        id: existingUser.id,
         email: existingUser.email || "",
-        displayName: existingUser.displayName || "",
         role: existingUser.role || "user",
       });
     }
@@ -42,8 +41,25 @@ const UserForm = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    if (!formData.email) {
+      toast.error("El correo electrónico es requerido");
+      return;
+    }
+
     try {
-      await saveUser(formData);
+      // Para usuarios administradores, establecer explícitamente el rol
+      const userData: Partial<User> = {
+        ...formData,
+        // Asegurar que el rol sea del tipo correcto
+        role: formData.role === "admin" ? "admin" : "user",
+      };
+
+      // Llamar a saveUser y manejar la promesa correctamente
+      saveUser(userData);
+
+      // No necesitamos await aquí porque saveUser es una función de mutación de React Query
+      // que no devuelve una promesa directamente, sino que maneja la mutación internamente
+
       toast.success(
         id
           ? "Usuario actualizado correctamente"
@@ -52,7 +68,9 @@ const UserForm = () => {
       navigate("/users");
     } catch (error) {
       console.error("Error al guardar usuario:", error);
-      toast.error("Error al guardar usuario");
+      toast.error(
+        error instanceof Error ? error.message : "Error al guardar usuario"
+      );
     }
   };
 
@@ -83,7 +101,6 @@ const UserForm = () => {
           <form onSubmit={handleSubmit}>
             <div className="shadow overflow-hidden sm:rounded-md">
               <div className="px-4 py-5 bg-white sm:p-6">
-                {/* Update the form to only show the email field by replacing the form's grid content inside the px-4 py-5 bg-white sm:p-6 div with this: */}
                 <div className="grid grid-cols-6 gap-6">
                   <div className="col-span-6 sm:col-span-4">
                     <label
@@ -101,6 +118,29 @@ const UserForm = () => {
                       required
                       className="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                     />
+                  </div>
+                  <div className="col-span-6 sm:col-span-4">
+                    <div className="flex items-center mt-4">
+                      <input
+                        id="isAdmin"
+                        name="isAdmin"
+                        type="checkbox"
+                        checked={formData.role === "admin"}
+                        onChange={(e) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            role: e.target.checked ? "admin" : "user",
+                          }));
+                        }}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label
+                        htmlFor="isAdmin"
+                        className="ml-2 block text-sm text-gray-900"
+                      >
+                        Crear como administrador
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>

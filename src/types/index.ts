@@ -1,7 +1,7 @@
 // Tipos de usuario
 export interface User {
-  uid: string;
-  email: string | null;
+  id: string; // Ahora usamos un ID automático
+  email: string;
   displayName: string | null;
   photoURL?: string | null;
   role: "admin" | "user";

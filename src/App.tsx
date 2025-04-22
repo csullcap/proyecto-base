@@ -1,7 +1,8 @@
 "use client";
 
 import { Outlet } from "react-router-dom";
-import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
+import MobileNavbar from "./components/MobileNavbar";
 import { Toaster } from "react-hot-toast";
 import { useAuth } from "./hooks/useAuth";
 
@@ -16,12 +17,32 @@ function App() {
     );
   }
 
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <main className="container mx-auto px-4 py-8">
+          <Outlet />
+        </main>
+        <Toaster position="top-right" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {user && <Navbar />}
-      <main className="container mx-auto px-4 py-8">
-        <Outlet />
-      </main>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <Sidebar />
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col">
+        <main className="container mx-auto px-4 py-8 flex-1 pb-20 md:pb-8">
+          <Outlet />
+        </main>
+      </div>
+
+      {/* Mobile Navigation Bar */}
+      <MobileNavbar />
+
       <Toaster position="top-right" />
     </div>
   );

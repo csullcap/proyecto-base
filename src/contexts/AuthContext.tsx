@@ -8,7 +8,15 @@ import {
   signOut,
   type User as FirebaseUser,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+} from "firebase/firestore";
 import { auth, db } from "../firebase/config";
 import type { AuthContextType, User } from "../types";
 
@@ -27,20 +35,61 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       auth,
       async (currentUser: FirebaseUser | null) => {
         if (currentUser) {
-          // Obtener datos adicionales del usuario desde Firestore
-          const userRef = doc(db, "users", currentUser.uid);
-          const userSnap = await getDoc(userRef);
+          try {
+            // Buscar usuario por email en lugar de por UID
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, where("email", "==", currentUser.email));
+            const querySnapshot = await getDocs(q);
 
-          if (userSnap.exists()) {
-            setUser({
-              uid: currentUser.uid,
-              email: currentUser.email,
-              displayName: currentUser.displayName,
-              photoURL: currentUser.photoURL,
-              ...(userSnap.data() as Partial<User>),
-            } as User);
-          } else {
-            // Si el usuario no existe en Firestore, cerrar sesión
+            if (!querySnapshot.empty) {
+              // Usar el primer documento que coincida con el email
+              const userDoc = querySnapshot.docs[0];
+              const userData = userDoc.data() as Omit<User, "id">;
+
+              // Verificar si necesitamos actualizar photoURL o displayName
+              let needsUpdate = false;
+              const updates: Partial<User> = {};
+
+              if (
+                currentUser.photoURL &&
+                currentUser.photoURL !== userData.photoURL
+              ) {
+                updates.photoURL = currentUser.photoURL;
+                needsUpdate = true;
+              }
+
+              if (
+                currentUser.displayName &&
+                currentUser.displayName !== userData.displayName
+              ) {
+                updates.displayName = currentUser.displayName;
+                needsUpdate = true;
+              }
+
+              // Actualizar el documento si es necesario
+              if (needsUpdate) {
+                await setDoc(doc(db, "users", userDoc.id), updates, {
+                  merge: true,
+                });
+              }
+
+              // Establecer el usuario en el estado
+              setUser({
+                id: userDoc.id,
+                email: currentUser.email || "",
+                displayName: currentUser.displayName || userData.displayName,
+                photoURL: currentUser.photoURL || userData.photoURL,
+                role: userData.role,
+                createdAt: userData.createdAt,
+                createdBy: userData.createdBy,
+              });
+            } else {
+              // Si el usuario no existe en Firestore, cerrar sesión
+              await signOut(auth);
+              setUser(null);
+            }
+          } catch (error) {
+            console.error("Error al buscar usuario:", error);
             await signOut(auth);
             setUser(null);
           }
@@ -59,11 +108,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
 
-      // Verificar si el usuario está registrado en Firestore
-      const userRef = doc(db, "users", result.user.uid);
-      const userSnap = await getDoc(userRef);
+      if (!result.user.email) {
+        throw new Error("No se pudo obtener el correo electrónico del usuario");
+      }
 
-      if (!userSnap.exists()) {
+      // Verificar si el usuario está registrado en Firestore por email
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("email", "==", result.user.email));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
         // Si el usuario no existe, cerrar sesión
         await signOut(auth);
         throw new Error("Usuario no autorizado. Contacte al administrador.");
@@ -80,28 +134,37 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return signOut(auth);
   };
 
+  // Actualizar la función createUser para usar IDs automáticos
   const createUser = async (userData: Partial<User>) => {
     try {
-      // Generate a random UID if not provided
-      const uid =
-        userData.uid ||
-        `user_${Date.now().toString(36)}_${Math.random()
-          .toString(36)
-          .substr(2, 5)}`;
+      if (!userData.email) {
+        throw new Error(
+          "El correo electrónico es requerido para crear un usuario"
+        );
+      }
 
-      // Create or update user in Firestore
-      await setDoc(
-        doc(db, "users", uid),
-        {
-          email: userData.email,
-          displayName: null, // No display name provided
-          role: "user", // Default role is user
-          createdAt: new Date().toISOString(),
-          createdBy: user?.uid || "system",
-        },
-        { merge: true }
+      // Verificar si el usuario ya existe
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("email", "==", userData.email));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        throw new Error(`El usuario con correo ${userData.email} ya existe`);
+      }
+
+      // Crear un nuevo documento con ID automático
+      const newUserRef = await addDoc(collection(db, "users"), {
+        email: userData.email,
+        displayName: userData.displayName || null,
+        photoURL: userData.photoURL || null,
+        role: userData.role || "user", // Default role is user
+        createdAt: new Date().toISOString(),
+        createdBy: user?.email || "system",
+      });
+
+      console.log(
+        `Usuario creado con éxito: ${userData.email}, ID: ${newUserRef.id}`
       );
-
       return true;
     } catch (error) {
       console.error("Error al crear usuario:", error);
