@@ -5,7 +5,7 @@ import { useAuth } from "../hooks/useAuth";
 import { Home, Users, LogOut, User } from "lucide-react";
 
 const MobileNavbar = () => {
-  const { user, logout, isAdmin } = useAuth();
+  const { logout, isAdmin } = useAuth();
   const location = useLocation();
 
   const handleLogout = async () => {
