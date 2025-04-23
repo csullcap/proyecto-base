@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { useUsers } from "../hooks/useUsers";
 import toast from "react-hot-toast";
 import type { User } from "../types";
+import { Plus, Trash2 } from "lucide-react";
 
 const Users = () => {
   const { users, isLoading, isError, deleteUser, isDeleting } = useUsers();
@@ -21,7 +22,7 @@ const Users = () => {
   if (isError) {
     return (
       <div
-        className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+        className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative"
         role="alert"
       >
         <strong className="font-bold">Error!</strong>
@@ -55,120 +56,166 @@ const Users = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="w-full max-w-full mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Usuarios</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
+          Usuarios
+        </h1>
         <Link
           to="/users/new"
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="inline-flex items-center px-3 py-2 md:px-4 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
         >
-          Nuevo Usuario
+          <Plus size={18} className="mr-1 md:mr-2" />
+          <span className="hidden sm:inline">Nuevo Usuario</span>
+          <span className="sm:hidden">Nuevo</span>
         </Link>
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Nombre
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Email
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Rol
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Fecha de creación
-                </th>
-                <th scope="col" className="relative px-6 py-3">
-                  <span className="sr-only">Acciones</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-6 py-4 text-center text-sm text-gray-500"
-                  >
-                    No hay usuarios registrados
-                  </td>
-                </tr>
-              ) : (
-                users.map((user) => (
-                  <tr key={user.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {user.photoURL && (
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <img
-                              className="h-10 w-10 rounded-full"
-                              src={user.photoURL || "/placeholder.svg"}
-                              alt=""
-                            />
-                          </div>
-                        )}
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {user.displayName || user.email}
-                          </div>
+      {/* Vista de tarjetas para todos los tamaños de pantalla */}
+      <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-100">
+        {users.length === 0 ? (
+          <div className="p-4 text-center text-gray-500">
+            No hay usuarios registrados
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {/* Encabezado de la tabla (solo visible en pantallas grandes) */}
+            <div className="hidden xl:grid xl:grid-cols-12 bg-gray-50 px-6 py-3 rounded-t-lg">
+              <div className="xl:col-span-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Nombre
+              </div>
+              <div className="xl:col-span-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Email
+              </div>
+              <div className="xl:col-span-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Rol
+              </div>
+              <div className="xl:col-span-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Fecha de creación
+              </div>
+              <div className="xl:col-span-1 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Acciones
+              </div>
+            </div>
+
+            {/* Filas de usuarios */}
+            {users.map((user, index) => (
+              <div
+                key={user.id}
+                className={`p-4 xl:p-0 hover:bg-gray-50 transition-colors duration-150 ${
+                  index === users.length - 1 ? "rounded-b-lg" : ""
+                }`}
+              >
+                {/* Vista para pantallas grandes (similar a tabla) */}
+                <div className="hidden xl:grid xl:grid-cols-12 xl:items-center xl:px-6 xl:py-4">
+                  <div className="xl:col-span-4">
+                    <div className="flex items-center">
+                      {user.photoURL ? (
+                        <div className="flex-shrink-0 h-10 w-10">
+                          <img
+                            className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                            src={user.photoURL || "/placeholder.svg"}
+                            alt=""
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-lg font-medium border border-gray-200">
+                          {user.email?.charAt(0).toUpperCase() || "U"}
+                        </div>
+                      )}
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.displayName || user.email}
                         </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{user.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.role === "admin"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-blue-100 text-blue-800"
-                        }`}
-                      >
-                        {user.role === "admin" ? "Administrador" : "Usuario"}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    </div>
+                  </div>
+                  <div className="xl:col-span-3 text-sm text-gray-900">
+                    {user.email}
+                  </div>
+                  <div className="xl:col-span-2">
+                    <span
+                      className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        user.role === "admin"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
+                      {user.role === "admin" ? "Administrador" : "Usuario"}
+                    </span>
+                  </div>
+                  <div className="xl:col-span-2 text-sm text-gray-500">
+                    {user.createdAt
+                      ? new Date(user.createdAt).toLocaleDateString()
+                      : "N/A"}
+                  </div>
+                  <div className="xl:col-span-1 text-right">
+                    <button
+                      onClick={() => handleDeleteClick(user)}
+                      className="text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded-md transition-colors duration-200"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+
+                {/* Vista para pantallas pequeñas y medianas (tarjetas) */}
+                <div className="xl:hidden">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      {user.photoURL ? (
+                        <img
+                          className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                          src={user.photoURL || "/placeholder.svg"}
+                          alt=""
+                        />
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-lg font-medium border border-gray-200">
+                          {user.email?.charAt(0).toUpperCase() || "U"}
+                        </div>
+                      )}
+                      <div className="ml-3">
+                        <div className="font-medium text-gray-900">
+                          {user.displayName || user.email}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {user.email}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteClick(user)}
+                      className="p-2 rounded-md text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span
+                      className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        user.role === "admin"
+                          ? "bg-green-100 text-green-800 border border-green-200"
+                          : "bg-blue-100 text-blue-800 border border-blue-200"
+                      }`}
+                    >
+                      {user.role === "admin" ? "Administrador" : "Usuario"}
+                    </span>
+                    <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
                       {user.createdAt
                         ? new Date(user.createdAt).toLocaleDateString()
                         : "N/A"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleDeleteClick(user)}
-                        className="text-red-600 hover:text-red-900 ml-4"
-                      >
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Modal de confirmación de eliminación */}
       {userToDelete && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
+        <div className="fixed z-50 inset-0 overflow-y-auto">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div
               className="fixed inset-0 transition-opacity"
@@ -221,7 +268,7 @@ const Users = () => {
               <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors duration-200"
                   onClick={confirmDelete}
                   disabled={isDeleting}
                 >
@@ -229,7 +276,7 @@ const Users = () => {
                 </button>
                 <button
                   type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors duration-200"
                   onClick={cancelDelete}
                   disabled={isDeleting}
                 >

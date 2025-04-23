@@ -35,3 +35,9 @@ body {
     height: 100vh;
   }
 }
+
+/* Estilos para el fondo del login */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}

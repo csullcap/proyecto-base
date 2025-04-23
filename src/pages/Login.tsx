@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Logo from "../components/Logo";
@@ -11,11 +11,13 @@ const Login = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  // Si el usuario ya está autenticado, redirigir al dashboard
-  if (user) {
-    navigate("/dashboard");
-    return null;
-  }
+  // Mover la redirección a un useEffect
+  useEffect(() => {
+    // Si el usuario ya está autenticado, redirigir al dashboard
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]); // Dependencias del useEffect
 
   const handleGoogleLogin = async () => {
     try {
@@ -32,9 +34,28 @@ const Login = () => {
     }
   };
 
+  // Si el usuario ya está autenticado, no renderizamos nada mientras se redirige
+  if (user) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-16 w-16 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Fondo con imagen y overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center z-0"
+        style={{ backgroundImage: `url('/images/ceprunsa_local.jpg')` }}
+      >
+        {/* Overlay con color difuminado */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-accent/80 mix-blend-multiply"></div>
+      </div>
+
+      {/* Contenido del login */}
+      <div className="relative z-10 max-w-md w-full space-y-8 bg-white bg-opacity-90 p-8 rounded-lg shadow-2xl backdrop-blur-sm">
         <div className="flex flex-col items-center">
           <Logo className="h-20 w-auto" />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -48,7 +69,7 @@ const Login = () => {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           >
             {loading ? (
               <span className="flex items-center">
@@ -86,6 +107,11 @@ const Login = () => {
               </span>
             )}
           </button>
+          <div className="text-center mt-4">
+            <p className="text-sm text-gray-600">
+              Centro Pre-Universitario de la Universidad Nacional de San Agustín
+            </p>
+          </div>
         </div>
       </div>
     </div>
