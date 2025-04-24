@@ -44,18 +44,26 @@ const Login = () => {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="h-screen w-full overflow-hidden flex items-center justify-center">
       {/* Fondo con imagen y overlay */}
       <div
-        className="absolute inset-0 bg-cover bg-center z-0"
-        style={{ backgroundImage: `url('/images/ceprunsa_local.jpg')` }}
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url('/images/ceprunsa_local.jpg')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
       >
-        {/* Overlay con color difuminado */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 to-accent/80 mix-blend-multiply"></div>
+        {/* Primera capa de desenfoque con color sólido */}
+        <div className="absolute inset-0 backdrop-blur-md bg-blue-900/60"></div>
+
+        {/* Segunda capa con gradiente para añadir profundidad */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-accent/50 mix-blend-overlay"></div>
       </div>
 
       {/* Contenido del login */}
-      <div className="relative z-10 max-w-md w-full space-y-8 bg-white bg-opacity-90 p-8 rounded-lg shadow-2xl backdrop-blur-sm">
+      <div className="relative z-10 max-w-md w-full mx-4 space-y-8 bg-white bg-opacity-95 p-8 rounded-lg shadow-2xl">
         <div className="flex flex-col items-center">
           <Logo className="h-20 w-auto" />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
