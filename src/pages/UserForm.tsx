@@ -99,7 +99,7 @@ const UserForm = () => {
         </div>
         <div className="mt-5 md:mt-0 md:col-span-2">
           <form onSubmit={handleSubmit}>
-            <div className="shadow overflow-hidden sm:rounded-md">
+            <div className="shadow overflow-hidden rounded-lg">
               <div className="px-4 py-5 bg-white sm:p-6">
                 <div className="grid grid-cols-6 gap-6">
                   <div className="col-span-6 sm:col-span-4">
@@ -148,14 +148,14 @@ const UserForm = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/users")}
-                  className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3"
+                  className="btn btn-secondary mr-3"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                  className="btn btn-primary"
                 >
                   {isSaving ? "Guardando..." : "Guardar"}
                 </button>

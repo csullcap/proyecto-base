@@ -48,7 +48,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
       >
         <div className="h-full flex flex-col">
           {/* Sidebar header */}
-          <div className="flex items-center justify-between p-4 border-b bg-gray-50 rounded-tr-lg">
+          <div className="flex items-center justify-center p-4 border-b text-white rounded-tr-lg">
             <Link
               to="/dashboard"
               className="flex items-center"
@@ -58,7 +58,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
             </Link>
             <button
               onClick={closeSidebar}
-              className="p-2 rounded-md text-gray-500 hover:bg-gray-200 md:hidden transition-colors duration-200"
+              className="p-2 rounded-md text-white hover:bg-[#3A4875] md:hidden transition-colors duration-200"
               aria-label="Cerrar sidebar"
             >
               <X size={20} />
@@ -73,6 +73,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
                   src={user.photoURL || "/placeholder.svg"}
                   alt={user.displayName || "Usuario"}
                   className="h-10 w-10 rounded-full mr-3 border border-gray-200 object-cover"
+                  referrerPolicy="no-referrer"
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-lg font-medium mr-3 border border-gray-200">
@@ -86,7 +87,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
                 <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               </div>
             </div>
-            <div className="mt-2">
+            <div className="mt-2 text-center">
               <span
                 className={`px-2 py-1 text-xs font-semibold rounded-full ${
                   user?.role === "admin"
@@ -107,7 +108,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
                   to="/dashboard"
                   className={`flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 ${
                     isActive("/dashboard")
-                      ? "bg-gray-100 text-primary font-medium"
+                      ? "bg-[#1A2855]/10 text-[#1A2855] font-medium"
                       : "text-gray-700"
                   }`}
                   onClick={closeSidebar}
@@ -125,7 +126,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
                     to="/users"
                     className={`flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 ${
                       isActive("/users")
-                        ? "bg-gray-100 text-primary font-medium"
+                        ? "bg-[#1A2855]/10 text-[#1A2855] font-medium"
                         : "text-gray-700"
                     }`}
                     onClick={closeSidebar}
@@ -143,7 +144,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
                   to="/profile"
                   className={`flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors duration-200 ${
                     isActive("/profile")
-                      ? "bg-gray-100 text-primary font-medium"
+                      ? "bg-[#1A2855]/10 text-[#1A2855] font-medium"
                       : "text-gray-700"
                   }`}
                   onClick={closeSidebar}
@@ -165,7 +166,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
                 handleLogout();
                 closeSidebar();
               }}
-              className="flex items-center w-full p-2 rounded-md text-red-600 hover:bg-red-50 transition-colors duration-200"
+              className="flex items-center w-full p-2 rounded-md text-[#7A1A2B] hover:bg-[#7A1A2B]/10 transition-colors duration-200"
             >
               <LogOut size={18} className="mr-3" />
               <span>Cerrar sesión</span>

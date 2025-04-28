@@ -24,6 +24,7 @@ const Profile = () => {
                 src={user.photoURL || "/placeholder.svg"}
                 alt={user.displayName || "Usuario"}
                 className="h-32 w-32 rounded-full border-4 border-white shadow-lg object-cover"
+                referrerPolicy="no-referrer"
               />
             ) : (
               <div className="h-32 w-32 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-4xl font-bold border-4 border-white shadow-lg">

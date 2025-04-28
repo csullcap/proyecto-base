@@ -25,7 +25,7 @@ function App() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen">
         <main className="container mx-auto px-4">
           <Outlet />
         </main>
@@ -42,7 +42,10 @@ function App() {
       {/* Main content */}
       <div className="flex-1 flex flex-col">
         {/* Mobile Header */}
-        <MobileHeader onOpenSidebar={handleOpenSidebar} />
+        <MobileHeader
+          onOpenSidebar={handleOpenSidebar}
+          appName="Aplicación-base"
+        />
 
         <main className="container mx-auto px-4 py-8 flex-1">
           <Outlet />
@@ -55,3 +58,4 @@ function App() {
 }
 
 export default App;
+// export default App;

@@ -63,7 +63,7 @@ const Users = () => {
         </h1>
         <Link
           to="/users/new"
-          className="inline-flex items-center px-3 py-2 md:px-4 md:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+          className="btn btn-primary inline-flex items-center"
         >
           <Plus size={18} className="mr-1 md:mr-2" />
           <span className="hidden sm:inline">Nuevo Usuario</span>
@@ -116,6 +116,7 @@ const Users = () => {
                             className="h-10 w-10 rounded-full object-cover border border-gray-200"
                             src={user.photoURL || "/placeholder.svg"}
                             alt=""
+                            referrerPolicy="no-referrer"
                           />
                         </div>
                       ) : (
@@ -168,6 +169,7 @@ const Users = () => {
                           className="h-10 w-10 rounded-full object-cover border border-gray-200"
                           src={user.photoURL || "/placeholder.svg"}
                           alt=""
+                          referrerPolicy="no-referrer"
                         />
                       ) : (
                         <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-lg font-medium border border-gray-200">
@@ -268,7 +270,7 @@ const Users = () => {
               <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors duration-200"
+                  className="btn btn-danger sm:ml-3"
                   onClick={confirmDelete}
                   disabled={isDeleting}
                 >
@@ -276,7 +278,7 @@ const Users = () => {
                 </button>
                 <button
                   type="button"
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors duration-200"
+                  className="btn btn-secondary mt-3 sm:mt-0 sm:ml-3"
                   onClick={cancelDelete}
                   disabled={isDeleting}
                 >

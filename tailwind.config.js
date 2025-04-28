@@ -52,6 +52,7 @@ module.exports = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        DEFAULT: "0.375rem", // Añadido valor por defecto para todos los elementos
       },
     },
   },
