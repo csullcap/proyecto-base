@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useUsers } from "../hooks/useUsers";
 import toast from "react-hot-toast";
 import type { User } from "../types";
+import { Save, X } from "lucide-react";
 
 const UserForm = () => {
   const { id } = useParams<{ id: string }>();
@@ -60,11 +61,6 @@ const UserForm = () => {
       // No necesitamos await aquí porque saveUser es una función de mutación de React Query
       // que no devuelve una promesa directamente, sino que maneja la mutación internamente
 
-      toast.success(
-        id
-          ? "Usuario actualizado correctamente"
-          : "Usuario creado correctamente"
-      );
       navigate("/users");
     } catch (error) {
       console.error("Error al guardar usuario:", error);
@@ -148,16 +144,20 @@ const UserForm = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/users")}
-                  className="btn btn-secondary mr-3"
+                  className="btn btn-secondary mr-3 inline-flex items-center"
+                  title="Cancelar"
                 >
-                  Cancelar
+                  <X size={18} className="mr-2" />
+                  <span>Cancelar</span>
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="btn btn-primary"
+                  className="btn btn-primary inline-flex items-center"
+                  title="Guardar usuario"
                 >
-                  {isSaving ? "Guardando..." : "Guardar"}
+                  <Save size={18} className="mr-2" />
+                  <span>{isSaving ? "Guardando..." : "Guardar"}</span>
                 </button>
               </div>
             </div>

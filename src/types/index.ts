@@ -27,7 +27,15 @@ export interface UsersHookReturn {
   error: Error | null;
   userByIdQuery: (id: string | undefined) => any;
   saveUser: (userData: Partial<User>) => void;
+  updateUserRole: ({
+    userId,
+    newRole,
+  }: {
+    userId: string;
+    newRole: "admin" | "user";
+  }) => void;
   deleteUser: (id: string) => void;
   isSaving: boolean;
+  isUpdatingRole: boolean;
   isDeleting: boolean;
 }

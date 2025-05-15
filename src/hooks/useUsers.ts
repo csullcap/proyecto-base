@@ -7,11 +7,13 @@ import {
   doc,
   getDoc,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "./useAuth";
 import type { User, UsersHookReturn } from "../types";
 import { useMemo } from "react";
+import toast from "react-hot-toast";
 
 export const useUsers = (): UsersHookReturn => {
   const queryClient = useQueryClient();
@@ -56,17 +58,57 @@ export const useUsers = (): UsersHookReturn => {
     try {
       // Crear usuario en Firestore
       await createUser(validatedUserData);
+      toast.success(`Usuario ${userData.email} creado exitosamente`);
       return validatedUserData;
     } catch (error) {
       console.error("Error en saveUser:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Error al crear usuario"
+      );
+      throw error;
+    }
+  };
+
+  // Actualizar rol de usuario
+  const updateUserRole = async ({
+    userId,
+    newRole,
+  }: {
+    userId: string;
+    newRole: "admin" | "user";
+  }): Promise<void> => {
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        role: newRole,
+      });
+      toast.success(
+        `Rol actualizado exitosamente a ${
+          newRole === "admin" ? "Administrador" : "Usuario"
+        }`
+      );
+    } catch (error) {
+      console.error("Error al actualizar rol:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Error al actualizar rol"
+      );
       throw error;
     }
   };
 
   // Eliminar usuario
   const deleteUser = async (id: string): Promise<string> => {
-    await deleteDoc(doc(db, "users", id));
-    return id;
+    try {
+      await deleteDoc(doc(db, "users", id));
+      toast.success("Usuario eliminado exitosamente");
+      return id;
+    } catch (error) {
+      console.error("Error al eliminar usuario:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Error al eliminar usuario"
+      );
+      throw error;
+    }
   };
 
   // React Query hooks
@@ -95,6 +137,13 @@ export const useUsers = (): UsersHookReturn => {
     },
   });
 
+  const updateRoleMutation = useMutation({
+    mutationFn: updateUserRole,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+
   const deleteUserMutation = useMutation({
     mutationFn: deleteUser,
     onSuccess: () => {
@@ -111,8 +160,10 @@ export const useUsers = (): UsersHookReturn => {
     error: usersQuery.error as Error | null,
     userByIdQuery: memoizedUserByIdQuery,
     saveUser: saveUserMutation.mutate,
+    updateUserRole: updateRoleMutation.mutate,
     deleteUser: deleteUserMutation.mutate,
     isSaving: saveUserMutation.isPending,
+    isUpdatingRole: updateRoleMutation.isPending,
     isDeleting: deleteUserMutation.isPending,
   };
 };

@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Logo from "./Logo";
 import { Home, Users, X, LogOut, ChevronRight, User } from "lucide-react";
+import { useState } from "react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ interface SidebarProps {
 const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const { user, logout, isAdmin } = useAuth();
   const location = useLocation();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const closeSidebar = () => {
     setIsOpen(false);
@@ -21,6 +23,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
   const handleLogout = async () => {
     try {
       await logout();
+      setShowLogoutConfirm(false);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
@@ -162,10 +165,7 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
           {/* Sidebar footer */}
           <div className="p-4 border-t">
             <button
-              onClick={() => {
-                handleLogout();
-                closeSidebar();
-              }}
+              onClick={() => setShowLogoutConfirm(true)}
               className="flex items-center w-full p-2 rounded-md text-[#7A1A2B] hover:bg-[#7A1A2B]/10 transition-colors duration-200"
             >
               <LogOut size={18} className="mr-3" />
@@ -174,6 +174,64 @@ const Sidebar = ({ isOpen, setIsOpen }: SidebarProps) => {
           </div>
         </div>
       </aside>
+      {/* Modal de confirmación para cerrar sesión */}
+      {showLogoutConfirm && (
+        <div className="fixed z-50 inset-0 overflow-y-auto">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <LogOut className="h-6 w-6 text-red-600" />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3
+                      className="text-lg leading-6 font-medium text-gray-900"
+                      id="modal-title"
+                    >
+                      Cerrar sesión
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        ¿Estás seguro de que deseas cerrar sesión? Tendrás que
+                        volver a iniciar sesión para acceder a tu cuenta.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="btn btn-danger sm:ml-3"
+                  onClick={handleLogout}
+                >
+                  Cerrar sesión
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary mt-3 sm:mt-0 sm:ml-3"
+                  onClick={() => setShowLogoutConfirm(false)}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -3,13 +3,21 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useUsers } from "../hooks/useUsers";
-import toast from "react-hot-toast";
 import type { User } from "../types";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Shield, ShieldOff } from "lucide-react";
 
 const Users = () => {
-  const { users, isLoading, isError, deleteUser, isDeleting } = useUsers();
+  const {
+    users,
+    isLoading,
+    isError,
+    deleteUser,
+    isDeleting,
+    updateUserRole,
+    isUpdatingRole,
+  } = useUsers();
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [userToChangeRole, setUserToChangeRole] = useState<User | null>(null);
 
   if (isLoading) {
     return (
@@ -38,21 +46,40 @@ const Users = () => {
     setUserToDelete(user);
   };
 
+  const handleChangeRoleClick = (user: User) => {
+    setUserToChangeRole(user);
+  };
+
   const confirmDelete = async () => {
     if (!userToDelete || !userToDelete.id) return;
 
     try {
       await deleteUser(userToDelete.id);
-      toast.success("Usuario eliminado correctamente");
       setUserToDelete(null);
     } catch (error) {
       console.error("Error al eliminar usuario:", error);
-      toast.error("Error al eliminar usuario");
+    }
+  };
+
+  const confirmChangeRole = async () => {
+    if (!userToChangeRole || !userToChangeRole.id) return;
+
+    const newRole = userToChangeRole.role === "admin" ? "user" : "admin";
+
+    try {
+      await updateUserRole({ userId: userToChangeRole.id, newRole });
+      setUserToChangeRole(null);
+    } catch (error) {
+      console.error("Error al cambiar rol:", error);
     }
   };
 
   const cancelDelete = () => {
     setUserToDelete(null);
+  };
+
+  const cancelChangeRole = () => {
+    setUserToChangeRole(null);
   };
 
   return (
@@ -150,12 +177,28 @@ const Users = () => {
                       ? new Date(user.createdAt).toLocaleDateString()
                       : "N/A"}
                   </div>
-                  <div className="xl:col-span-1 text-right">
+                  <div className="xl:col-span-1 text-right flex justify-end space-x-2">
+                    <button
+                      onClick={() => handleChangeRoleClick(user)}
+                      className="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                      title={
+                        user.role === "admin"
+                          ? "Cambiar a Usuario"
+                          : "Cambiar a Administrador"
+                      }
+                    >
+                      {user.role === "admin" ? (
+                        <ShieldOff size={18} />
+                      ) : (
+                        <Shield size={18} />
+                      )}
+                    </button>
                     <button
                       onClick={() => handleDeleteClick(user)}
-                      className="text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded-md transition-colors duration-200"
+                      className="p-2 rounded-md text-red-600 hover:bg-red-50 transition-colors duration-200"
+                      title="Eliminar usuario"
                     >
-                      Eliminar
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </div>
@@ -185,12 +228,29 @@ const Users = () => {
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteClick(user)}
-                      className="p-2 rounded-md text-red-600 hover:bg-red-50 transition-colors duration-200"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    <div className="flex space-x-1">
+                      <button
+                        onClick={() => handleChangeRoleClick(user)}
+                        className="p-2 rounded-md text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                        title={
+                          user.role === "admin"
+                            ? "Cambiar a Usuario"
+                            : "Cambiar a Administrador"
+                        }
+                      >
+                        {user.role === "admin" ? (
+                          <ShieldOff size={18} />
+                        ) : (
+                          <Shield size={18} />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(user)}
+                        className="p-2 rounded-md text-red-600 hover:bg-red-50 transition-colors duration-200"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between">
                     <span
@@ -235,21 +295,7 @@ const Users = () => {
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <svg
-                      className="h-6 w-6 text-red-600"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                      />
-                    </svg>
+                    <Trash2 className="h-6 w-6 text-red-600" />
                   </div>
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                     <h3
@@ -260,8 +306,11 @@ const Users = () => {
                     </h3>
                     <div className="mt-2">
                       <p className="text-sm text-gray-500">
-                        ¿Estás seguro de que deseas eliminar a este usuario?
-                        Esta acción no se puede deshacer.
+                        ¿Estás seguro de que deseas eliminar a{" "}
+                        <span className="font-semibold">
+                          {userToDelete.email}
+                        </span>
+                        ? Esta acción no se puede deshacer.
                       </p>
                     </div>
                   </div>
@@ -281,6 +330,86 @@ const Users = () => {
                   className="btn btn-secondary mt-3 sm:mt-0 sm:ml-3"
                   onClick={cancelDelete}
                   disabled={isDeleting}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmación de cambio de rol */}
+      {userToChangeRole && (
+        <div className="fixed z-50 inset-0 overflow-y-auto">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                    {userToChangeRole.role === "admin" ? (
+                      <ShieldOff className="h-6 w-6 text-blue-600" />
+                    ) : (
+                      <Shield className="h-6 w-6 text-blue-600" />
+                    )}
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3
+                      className="text-lg leading-6 font-medium text-gray-900"
+                      id="modal-title"
+                    >
+                      Cambiar rol de usuario
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        ¿Estás seguro de que deseas cambiar el rol de{" "}
+                        <span className="font-semibold">
+                          {userToChangeRole.email}
+                        </span>{" "}
+                        de{" "}
+                        <span className="font-semibold">
+                          {userToChangeRole.role === "admin"
+                            ? "Administrador"
+                            : "Usuario"}
+                        </span>{" "}
+                        a{" "}
+                        <span className="font-semibold">
+                          {userToChangeRole.role === "admin"
+                            ? "Usuario"
+                            : "Administrador"}
+                        </span>
+                        ?
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className="btn btn-primary sm:ml-3"
+                  onClick={confirmChangeRole}
+                  disabled={isUpdatingRole}
+                >
+                  {isUpdatingRole ? "Actualizando..." : "Cambiar rol"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary mt-3 sm:mt-0 sm:ml-3"
+                  onClick={cancelChangeRole}
+                  disabled={isUpdatingRole}
                 >
                   Cancelar
                 </button>
